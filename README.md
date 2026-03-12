@@ -25,3 +25,19 @@ Aplicativo de gestão desenvolvido com **Firebase**, permitindo controle de dado
 
 ```bash
 git clone https://github.com/ramoncastrovieira-wq/appGestaoFirebase.git
+
+2. Instale as dependências:
+
+## Backend
+cd backend  
+npm install  
+npm start
+
+## Frontend
+cd frontend  
+npm install  
+npm start
+
+## Firebase
+Configurar serviceAccountKey.json em /backend/firebase  
+Configurar firebaseConfig.js em /frontend/src
