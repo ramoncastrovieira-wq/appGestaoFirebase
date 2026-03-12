@@ -2,6 +2,8 @@
 
 Aplicativo de gestão desenvolvido com **Firebase**, permitindo controle de dados em tempo real, autenticação de usuários e armazenamento em nuvem.
 
+(O PROJETO ESTÁ EM DESENVOLVIMENTO, ANTES FAZIA PARTE DE UM PEQUENO PROJETO DO CURSO DE FIREBASE DA DANKICODE, MAS QUERO EXPANDIR PARA QUE SE TORNE FULLSTACK)
+
 ## 🔹 Funcionalidades
 
 - Autenticação de usuários (login e cadastro)
