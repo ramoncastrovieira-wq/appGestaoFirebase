@@ -1,0 +1,226 @@
+<html>
+    <head>
+        <title>Portal do Cliente</title>
+        <style>
+            *{margin:0;padding:0;box-sizing: border-box;}
+            body{
+                background-color: #27282d;
+            }
+
+            .cliente{
+                max-width: 700px;
+                margin:20px auto;
+                width:100%;
+                text-align: center;
+            }
+
+            .cliente img{
+                max-width: 500px;
+                width:100%;
+            }
+            .cliente h2{color:white;}
+
+            .cliente form{
+                padding:10px;
+            }
+
+            .cliente textarea{
+                width:100%;
+                height: 120px;
+                padding:10px;
+            }
+
+            .cliente input[type=file]{
+                margin:10px 0;
+                border:1px solid #ccc;
+                padding:8px;
+            }
+
+            .cliente input[type=submit]{
+                width:100%;
+                height:50px;
+                display: block;
+                background-color: blueviolet;
+                color:white;
+                border:0;
+                cursor: pointer;
+                font-size: 20px;
+
+            }
+
+            .admin img{
+                max-width:350px;
+                border-radius:10px;
+                margin-top:110px;
+                
+            }
+
+            .admin{
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="display: none;" class="cliente">
+        <img src="danki_bg.jpg" />
+        <h2>Deseja dar aulas na Plataforma?</h2>
+        <form id="form-cliente">
+            <textarea placeholder="Qual curso você gostaria de dar?" name="comprovante"></textarea>
+            <input type="file" name="arquivo" />
+            <input type="submit" name="acao" value="Enviar!" />
+        </form>
+        </div><!--cliente-->
+
+        <div style="display: none;" class="admin">
+            <a id="login" href="#"><img src="googlesign.jpg" /></a>
+            <div style="display:none;" class="listar-pedidos">
+                <h1 style="color:white;">Últimas solicitações:</h1>
+                <div class="container-pedidos">
+
+                </div><!--container-pedidos-->
+            </div><!--listar-pedidos-->
+        </div><!--admin-->
+
+
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+        <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-storage.js"></script>
+
+
+        <!-- TODO: Add SDKs for Firebase products that you want to use
+            https://firebase.google.com/docs/web/setup#available-libraries -->
+
+        <script>
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+        // Import the functions you need from the SDKs you need
+
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        apiKey: "AIzaSyDAAjfE98hDNs46bG1o8K1HqmD64esaQNQ",
+        authDomain: "todo-list-6cf71.firebaseapp.com",
+        projectId: "todo-list-6cf71",
+        storageBucket: "todo-list-6cf71.firebasestorage.app",
+        messagingSenderId: "875224978224",
+        appId: "1:875224978224:web:3dc2d13f7f7c8facf36ef5",
+        measurementId: "G-LT6FXTBF3M"
+        };
+
+    // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        const storage = firebase.storage();
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        const formCliente = document.querySelector('#form-cliente');
+
+        formCliente.addEventListener('submit',(e)=>{
+            e.preventDefault();
+
+            let comprovanteText = document.querySelector('[name=comprovante]').value;
+            let arquivo = document.querySelector('[name=arquivo]').files[0];
+
+            const uploadTask = storage.ref('documentos/'+arquivo.name).put(arquivo);
+
+            uploadTask.on('state_changed',(snapshot)=>{
+                const progress = (snapshot.bytesTransferred/snapshot.totalBytes) * 1;
+                console.log(progress);
+            },
+            function(error){
+
+            },
+
+            function(){
+                storage.ref('documentos/'+arquivo.name).getDownloadURL().then((url)=>{
+                    db.collection('documentos').add({
+                        descricao: comprovanteText,
+                        arquivoURL: url
+                    })
+                })
+
+                alert('Sua solicitação foi enviada com sucesso!');
+                formCliente.reset();
+            }
+            
+            )
+
+            
+            
+        })
+
+
+        const loginBtn = document.getElementById('login');
+        loginBtn.addEventListener('click',(e)=>{
+            e.preventDefault();
+            //Abrir pouup do google para fazer login
+            auth.signInWithPopup(provider);
+        })
+
+
+        //Puxar pedidos do firestore.
+
+        db.collection('documentos').onSnapshot((data)=>{
+            let list = document.querySelector('.container-pedidos');
+            list.innerHTML = "";
+            data.docs.map((val)=>{
+                list.innerHTML+=`
+                
+                    <div style="background-color:white;padding:20px;margin-bottom:20px;text-align:left;" class="container-single-pedido">
+                        <p><b>Descrição:</b>${val.data().descricao}</p>
+                        <p style="vertical-align:middle;"><b>Arquivo Anexado:</b> <img style="max-width:250px;margin-top:10px;vertical-align:middle;" src="${val.data().arquivoURL}" /> </p> 
+                    </div>
+                    <hr>
+                
+                `;
+            })
+        })
+
+
+        </script>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const myParam = urlParams.get('admin');
+
+            if(myParam != null){
+                //Eu quero entrar na área administrativa.
+                
+                const adminArea = document.querySelector('.admin');
+                adminArea.style.display = "block";
+
+                auth.onAuthStateChanged((val)=>{
+                if(val){
+                    if(val.email == "ramoncastrovieira@gmail.com"){
+                        loginBtn.style.display = "none";
+                        alert('Loguei como admin!');
+                        document.querySelector('.listar-pedidos').style.display="block";
+
+                    }else{
+                        alert('Este e-mail não é autorizado.');
+                    }
+                }
+            })
+
+
+            }else{
+                //Sou usuário.
+                const clienteArea = document.querySelector('.cliente');
+                clienteArea.style.display = "block";
+            }
+        </script>
+
+    </body>
+</html>
